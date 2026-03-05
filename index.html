@@ -789,6 +789,49 @@ h2 em { font-style: italic; color: var(--gold); }
 }
 
 /* ══════════════════════════════════
+   CONTACT / CONSULTATION
+══════════════════════════════════ */
+#consultation {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.form-shell {
+  background: linear-gradient(135deg, rgba(99,202,183,0.06) 0%, rgba(232,201,122,0.04) 100%);
+  border: 1px solid var(--border-hi);
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 980px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.form-note {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 720px;
+}
+
+.form-embed {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(6,8,15,0.55);
+}
+
+.form-embed iframe {
+  width: 100%;
+  height: 760px;
+  border: 0;
+}
+
+/* ══════════════════════════════════
    FOOTER
 ══════════════════════════════════ */
 footer {
@@ -851,6 +894,9 @@ footer {
   .workflow-card { grid-template-columns: 1fr; padding: 40px 28px; }
   .workflow-card::after { display: none; }
   footer { flex-direction: column; gap: 12px; text-align: center; }
+  .divider { margin: 0 24px; }
+  .form-shell { padding: 18px; }
+  .form-embed iframe { height: 820px; }
 }
 </style>
 </head>
@@ -864,6 +910,7 @@ footer {
     <li><a href="#workflow">Workflow</a></li>
     <li><a href="#getting-started">Get Started</a></li>
     <li><a href="#questions">Questions</a></li>
+    <li><a href="#consultation">Consultation</a></li>
   </ul>
 </nav>
 
@@ -889,6 +936,10 @@ footer {
     <a href="#getting-started" class="btn-ghost">
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
       Getting Started
+    </a>
+    <a href="#consultation" class="btn-ghost">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4v8z"/></svg>
+      Contact for Consultation
     </a>
   </div>
 
@@ -1291,6 +1342,22 @@ footer {
   </div>
 </section>
 
+<!-- ══ CONTACT FOR CONSULTATION ══ -->
+<section id="consultation">
+  <div class="section-label">Contact</div>
+  <h2>Contact for<br /><em>Consultation</em></h2>
+  <p class="section-intro">Use the form below to share your use case and constraints. I’ll reply with next steps and a suggested scope.</p>
+
+  <div class="form-shell reveal">
+    <div class="form-grid">
+      <div class="form-note">If the embedded form doesn’t load in your browser, open it in a new tab from within the iframe menu.</div>
+      <div class="form-embed">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdYdbnX6K0kLNc622nuiIMlooF5DQK-h6kFxTEwQD_2_qpvMg/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0" loading="lazy">Loading…</iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══ FOOTER ══ -->
 <footer>
   <div class="footer-brand">
@@ -1377,6 +1444,9 @@ footer {
     if (mk && !String(mk.href || '').startsWith('https://eu1.make.com')) {
       errors.push('Make.com button href is not pointing to https://eu1.make.com');
     }
+
+    const form = document.querySelector('#consultation iframe');
+    if (!form) errors.push('Missing consultation form iframe');
 
     if (errors.length) {
       console.error('[Portfolio self-test] FAILED', errors);
