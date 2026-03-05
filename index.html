@@ -1301,21 +1301,34 @@ footer {
 
 <!-- ══ JS ══ -->
 <script>
-  // Links (hard-wired in the buttons, and repeated here for clarity)
-// Blueprint: direct download (raw GitHub)
-// Make.com: EU region homepage (replace with your scenario share link if you have one)
-const BLUEPRINT_URL = "https://raw.githubusercontent.com/aminabennejma/Automated-literature-surveillance/main/Integration%20RSS%2C%20Google%20Sheets.blueprint.json";
-const MAKE_SHARE_URL = "https://eu1.make.com/";
+  // Links (buttons already have href attributes; these constants are kept for clarity + future reuse)
+  const BLUEPRINT_URL = "https://raw.githubusercontent.com/aminabennejma/Automated-literature-surveillance/main/Integration%20RSS%2C%20Google%20Sheets.blueprint.json";
+  const MAKE_SHARE_URL = "https://eu1.make.com/";
 
-  function // Buttons are already connected via their href attributes.
-// We keep the helper in case you later want to override the links from these constants.
-wireButton('blueprintBtn', BLUEPRINT_URL, '');
-wireButton('makeShareBtn', MAKE_SHARE_URL, '');
+  /**
+   * Wire a button to a URL (only if a URL is provided).
+   * Expected behavior:
+   * - If url is a non-empty string: set href/target/rel.
+   * - If url is empty: do nothing (button uses existing href).
+   */
+  function wireButton(buttonId, url) {
+    const el = document.getElementById(buttonId);
+    if (!el) return;
+    if (!url || !String(url).trim()) return;
+    el.href = url;
+    el.target = "_blank";
+    el.rel = "noopener";
+  }
+
+  // Keep in sync with the anchors above (safe even if already set)
+  wireButton('blueprintBtn', BLUEPRINT_URL);
+  wireButton('makeShareBtn', MAKE_SHARE_URL);
 
   // FAQ accordion
-  document.querySelectorAll('.faq-q').forEach(btn => {
+  document.querySelectorAll('.faq-q').forEach((btn) => {
     btn.addEventListener('click', () => {
       const item = btn.closest('.faq-item');
+      if (!item) return;
       const isOpen = item.classList.contains('open');
       document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
       if (!isOpen) item.classList.add('open');
@@ -1346,6 +1359,32 @@ wireButton('makeShareBtn', MAKE_SHARE_URL, '');
       a.style.color = a.getAttribute('href') === '#' + current ? 'var(--teal)' : '';
     });
   });
+
+  // Lightweight self-tests (run once; logs to console only)
+  (function runTests(){
+    const errors = [];
+
+    const bp = document.getElementById('blueprintBtn');
+    const mk = document.getElementById('makeShareBtn');
+
+    if (!bp) errors.push('Missing element: #blueprintBtn');
+    if (!mk) errors.push('Missing element: #makeShareBtn');
+
+    if (bp && !String(bp.href || '').includes('raw.githubusercontent.com')) {
+      errors.push('Blueprint button href is not a raw GitHub URL (download may not work).');
+    }
+
+    if (mk && !String(mk.href || '').startsWith('https://eu1.make.com')) {
+      errors.push('Make.com button href is not pointing to https://eu1.make.com');
+    }
+
+    if (errors.length) {
+      console.error('[Portfolio self-test] FAILED', errors);
+    } else {
+      console.info('[Portfolio self-test] OK');
+    }
+  })();
 </script>
 </body>
 </html>
+
