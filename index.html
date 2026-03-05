@@ -1008,18 +1008,18 @@ footer {
       </div>
 
       <div class="hero-cta-row">
-        <a id="blueprintBtn" href="#" class="btn-primary">
+        <a id="blueprintBtn" href="https://raw.githubusercontent.com/aminabennejma/Automated-literature-surveillance/main/Integration%20RSS%2C%20Google%20Sheets.blueprint.json" class="btn-primary" target="_blank" rel="noopener">
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           Download Blueprint (.json)
         </a>
-        <a id="makeShareBtn" href="#" class="btn-ghost">
+        <a id="makeShareBtn" href="https://eu1.make.com/" class="btn-ghost" target="_blank" rel="noopener">
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           Open in Make.com
         </a>
       </div>
 
       <div style="margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7;max-width:640px;">
-        <span style="color:var(--teal)">Tip:</span> set the two URLs in the script at the bottom of this file (<code>BLUEPRINT_URL</code> and <code>MAKE_SHARE_URL</code>) and these buttons will work.
+        <span style="color:var(--teal)">Connected:</span> the buttons are already wired to your blueprint download and Make.com (EU region).
       </div>
     </div>
 
@@ -1301,38 +1301,16 @@ footer {
 
 <!-- ══ JS ══ -->
 <script>
-  // 1) Set your links here
-  //    - BLUEPRINT_URL: direct download link (GitHub raw URL, your site, etc.)
-  //    - MAKE_SHARE_URL: Make.com scenario share link (if you generated one)
-  const BLUEPRINT_URL = "https://raw.githubusercontent.com/aminabennejma/Automated-literature-surveillance/main/Integration%20RSS%2C%20Google%20Sheets.blueprint.json";
-  const MAKE_SHARE_URL = "https://eu1.make.com/";
+  // Links (hard-wired in the buttons, and repeated here for clarity)
+// Blueprint: direct download (raw GitHub)
+// Make.com: EU region homepage (replace with your scenario share link if you have one)
+const BLUEPRINT_URL = "https://raw.githubusercontent.com/aminabennejma/Automated-literature-surveillance/main/Integration%20RSS%2C%20Google%20Sheets.blueprint.json";
+const MAKE_SHARE_URL = "https://eu1.make.com/";
 
-  function wireButton(id, url, emptyMessage) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (url && url.trim()) {
-      el.href = url;
-      el.target = "_blank";
-      el.rel = "noopener";
-      return;
-    }
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      alert(emptyMessage);
-    });
-  }
-
-  wireButton(
-    'blueprintBtn',
-    BLUEPRINT_URL,
-    'Set BLUEPRINT_URL in the script at the bottom of this HTML to your blueprint JSON download link.'
-  );
-
-  wireButton(
-    'makeShareBtn',
-    MAKE_SHARE_URL,
-    'Set MAKE_SHARE_URL in the script at the bottom of this HTML to your Make.com scenario share link.'
-  );
+  function // Buttons are already connected via their href attributes.
+// We keep the helper in case you later want to override the links from these constants.
+wireButton('blueprintBtn', BLUEPRINT_URL, '');
+wireButton('makeShareBtn', MAKE_SHARE_URL, '');
 
   // FAQ accordion
   document.querySelectorAll('.faq-q').forEach(btn => {
