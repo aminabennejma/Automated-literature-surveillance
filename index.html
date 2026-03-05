@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Research Intelligence Pipeline · Make.com Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #06080f;
+  --surface: #0c1120;
+  --surface2: #111827;
+  --border: rgba(255,255,255,0.07);
+  --border-hi: rgba(99,202,183,0.35);
+  --teal: #63cab7;
+  --teal-dim: rgba(99,202,183,0.15);
+  --gold: #e8c97a;
+  --gold-dim: rgba(232,201,122,0.12);
+  --text: #dde4ef;
+  --muted: #64748b;
+  --faint: #1c2537;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Outfit', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════
+   NOISE OVERLAY
+══════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.6;
+}
+
+/* ══════════════════════════════════
+   NAV
+══════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 56px;
+  background: rgba(6,8,15,0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--teal);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ══════════════════════════════════
+   HERO
+══════════════════════════════════ */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 140px 56px 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* mesh gradient blobs */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+.blob-1 {
+  width: 600px; height: 500px;
+  background: radial-gradient(circle, rgba(99,202,183,0.13) 0%, transparent 70%);
+  top: -100px; left: -100px;
+}
+.blob-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(232,201,122,0.08) 0%, transparent 70%);
+  bottom: -100px; right: 200px;
+}
+.blob-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+  top: 40%; right: -50px;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--teal);
+  opacity: 0.6;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(52px, 6vw, 88px);
+  font-weight: 400;
+  line-height: 1.05;
+  color: #fff;
+  max-width: 900px;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--teal);
+}
+
+.hero-desc {
+  font-size: 17px;
+  color: var(--muted);
+  max-width: 620px;
+  line-height: 1.75;
+  margin-bottom: 48px;
+  font-weight: 300;
+}
+
+.hero-cta-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 30px;
+  background: var(--teal);
+  color: #06080f;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+}
+.btn-primary:hover {
+  background: #7ddece;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 30px rgba(99,202,183,0.25);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 30px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+}
+.btn-ghost:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 0;
+  margin-top: 80px;
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+  max-width: 760px;
+}
+.hstat {
+  flex: 1;
+  padding-right: 32px;
+  border-right: 1px solid var(--border);
+  margin-right: 32px;
+}
+.hstat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+.hstat-num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 36px;
+  color: var(--teal);
+  display: block;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.hstat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ══════════════════════════════════
+   SHARED SECTION STYLES
+══════════════════════════════════ */
+section {
+  padding: 120px 56px;
+  position: relative;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  max-width: 48px;
+  height: 1px;
+  background: var(--teal);
+  opacity: 0.4;
+}
+
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+
+h2 em { font-style: italic; color: var(--gold); }
+
+.section-intro {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 620px;
+  line-height: 1.8;
+  margin-bottom: 64px;
+}
+
+/* ══════════════════════════════════
+   ABOUT SECTION
+══════════════════════════════════ */
+#about {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.about-text p {
+  font-size: 16px;
+  color: #94a3b8;
+  line-height: 1.85;
+  margin-bottom: 20px;
+}
+.about-text p strong { color: var(--text); font-weight: 500; }
+
+.pipeline-visual {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.pipeline-visual::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
+}
+
+.pipe-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.pipe-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.pipe-step:last-child { border-bottom: none; }
+
+.pipe-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  position: relative;
+}
+.pipe-icon.orange { background: rgba(251,146,60,0.12); }
+.pipe-icon.green  { background: rgba(52,211,153,0.12); }
+.pipe-icon.purple { background: rgba(139,92,246,0.12); }
+.pipe-icon.amber  { background: rgba(251,191,36,0.12); }
+.pipe-icon.blue   { background: rgba(96,165,250,0.12); }
+
+.pipe-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.pipe-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* connector dot */
+.pipe-step::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: -1px;
+  width: 2px;
+  height: 100%;
+  background: var(--border);
+  z-index: 0;
+}
+.pipe-step:first-child::before { top: 50%; }
+.pipe-step:last-child::before { height: 50%; }
+.pipe-step::after {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  z-index: 1;
+}
+
+/* ══════════════════════════════════
+   WORKFLOW LINK SECTION
+══════════════════════════════════ */
+#workflow {
+  position: relative;
+  overflow: hidden;
+}
+
+.workflow-card {
+  background: linear-gradient(135deg, rgba(99,202,183,0.06) 0%, rgba(232,201,122,0.04) 100%);
+  border: 1px solid var(--border-hi);
+  border-radius: 20px;
+  padding: 64px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.workflow-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--teal) 50%, transparent 100%);
+}
+.workflow-card::after {
+  content: 'MAKE.COM';
+  position: absolute;
+  bottom: 28px;
+  right: 40px;
+  font-family: var(--mono);
+  font-size: 64px;
+  font-weight: 500;
+  color: rgba(99,202,183,0.04);
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+.wf-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.wf-title {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 400;
+  color: #fff;
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+.wf-desc {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: 560px;
+  margin-bottom: 36px;
+}
+
+.wf-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+.wf-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--faint);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 12px;
+}
+.wf-tag span { color: var(--teal); }
+
+.wf-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.make-badge {
+  width: 96px; height: 96px;
+  background: rgba(99,202,183,0.1);
+  border: 1px solid var(--border-hi);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+}
+
+/* ══════════════════════════════════
+   GETTING STARTED
+══════════════════════════════════ */
+#getting-started {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.step-card {
+  background: var(--surface2);
+  padding: 36px 32px;
+  position: relative;
+  transition: background 0.2s;
+}
+.step-card:hover { background: #141e30; }
+
+.step-num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 56px;
+  color: rgba(99,202,183,0.1);
+  line-height: 1;
+  margin-bottom: 16px;
+  display: block;
+}
+.step-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.step-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.step-badge {
+  display: inline-block;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  background: var(--teal-dim);
+  border: 1px solid rgba(99,202,183,0.2);
+  border-radius: 3px;
+  padding: 3px 10px;
+}
+
+/* Module pills ("click this module") */
+.module-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.module-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #cbd5e1;
+  background: rgba(2,6,23,0.35);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.module-pill b{
+  color: var(--teal);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Workflow figure */
+.workflow-figure{
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 18px;
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+.workflow-figure h3{
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.workflow-figure p{
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 10px;
+}
+.workflow-figure .cap{
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #475569;
+  margin-top: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Adaptation table */
+.adapt-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  color: #fff;
+  margin-bottom: 24px;
+  font-weight: 400;
+}
+
+.adapt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.adapt-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+.adapt-card:hover { border-color: rgba(232,201,122,0.3); }
+
+.adapt-module {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--gold);
+  margin-bottom: 8px;
+  letter-spacing: 0.08em;
+}
+.adapt-heading {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.adapt-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.adapt-code {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #64748b;
+  background: var(--faint);
+  border-radius: 5px;
+  padding: 8px 12px;
+  line-height: 1.6;
+}
+.adapt-code .hl { color: #7dd3fc; }
+
+/* ══════════════════════════════════
+   QUESTIONS / FAQ
+══════════════════════════════════ */
+#questions { position: relative; }
+
+.faq-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.faq-sidebar h2 { font-size: 40px; margin-bottom: 16px; }
+.faq-sidebar p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.faq-contact {
+  margin-top: 40px;
+  padding: 24px;
+  background: var(--teal-dim);
+  border: 1px solid rgba(99,202,183,0.2);
+  border-radius: 12px;
+}
+.faq-contact-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.faq-contact p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.faq-list { display: flex; flex-direction: column; gap: 0; }
+
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.faq-item:first-child { border-top: 1px solid var(--border); }
+
+.faq-q {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  gap: 16px;
+}
+.faq-q:hover { color: var(--teal); }
+
+.faq-icon {
+  width: 24px; height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+.faq-item.open .faq-icon {
+  background: var(--teal-dim);
+  border-color: var(--teal);
+  color: var(--teal);
+  transform: rotate(45deg);
+}
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.3s;
+}
+.faq-item.open .faq-a { max-height: 460px; padding-bottom: 24px; }
+.faq-a p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 640px;
+}
+.faq-a code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--faint);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: var(--teal);
+}
+
+/* ══════════════════════════════════
+   FOOTER
+══════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-brand {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.footer-brand strong {
+  color: var(--teal);
+  font-weight: 500;
+}
+.footer-note {
+  font-size: 12px;
+  color: #334155;
+  font-family: var(--mono);
+}
+
+/* ══════════════════════════════════
+   SCROLL ANIMATIONS
+══════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* stagger */
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+.reveal-d4 { transition-delay: 0.4s; }
+
+/* ══════════════════════════════════
+   DIVIDER
+══════════════════════════════════ */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0 56px;
+}
+
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media (max-width: 900px) {
+  nav { padding: 16px 24px; }
+  section, #hero { padding: 80px 24px; }
+  .about-grid, .steps-grid, .faq-layout, .adapt-grid { grid-template-columns: 1fr; }
+  .workflow-card { grid-template-columns: 1fr; padding: 40px 28px; }
+  .workflow-card::after { display: none; }
+  footer { flex-direction: column; gap: 12px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <a href="#hero" class="nav-logo">⬡ Research Pipeline</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#workflow">Workflow</a></li>
+    <li><a href="#getting-started">Get Started</a></li>
+    <li><a href="#questions">Questions</a></li>
+  </ul>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="hero-eyebrow">Make.com Automation · Research Intelligence</div>
+
+  <h1>Automated literature<br />surveillance for <em>any</em><br />research domain</h1>
+
+  <p class="hero-desc">
+    A plug-and-play Make.com scenario that monitors an RSS feed (PubMed or any source), deduplicates entries, extracts structured fields with an LLM, and writes everything to Google Sheets — fully hands-free.
+  </p>
+
+  <div class="hero-cta-row">
+    <a href="#workflow" class="btn-primary">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Access the Workflow
+    </a>
+    <a href="#getting-started" class="btn-ghost">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Getting Started
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hstat">
+      <span class="hstat-num">25</span>
+      <span class="hstat-label">Items per run</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-num">12</span>
+      <span class="hstat-label">Extracted fields</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-num">6</span>
+      <span class="hstat-label">Pipeline modules</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-num">0</span>
+      <span class="hstat-label">Manual steps</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ABOUT ══ -->
+<section id="about">
+  <div class="section-label">About the Workflow</div>
+  <div class="about-grid">
+    <div class="about-text">
+      <h2>What does this<br /><em>pipeline</em> do?</h2>
+      <p>
+        This Make.com scenario is built to solve a common research pain: <strong>staying on top of a fast-moving literature</strong> without spending hours manually searching, triaging, and logging papers.
+      </p>
+      <p>
+        On each run, it fetches fresh items from an RSS feed (PubMed RSS by default), checks your <strong>Google Sheets database</strong> to prevent duplicates, then sends the abstract/summary to an LLM to extract a clean JSON payload.
+      </p>
+      <p>
+        That JSON is sanitized, parsed, and mapped into columns so you get a <strong>continuously growing, filterable research database</strong> for your own project — whether you’re tracking a biological pathway, a clinical area, a method, or an interdisciplinary topic.
+      </p>
+      <p>
+        Everything is modular: swap the RSS source, change the extraction fields, and remap the sheet — typically in <strong>&lt; 30 minutes</strong>.
+      </p>
+    </div>
+
+    <div class="pipeline-visual reveal">
+      <div class="pipe-title">// pipeline · 6 modules</div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon orange">📡</div>
+        <div class="pipe-body">
+          <div class="pipe-name">RSS Reader</div>
+          <div class="pipe-sub">rss:ActionReadArticles · max 25 items</div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon green">🔍</div>
+        <div class="pipe-body">
+          <div class="pipe-name">Duplicate Check</div>
+          <div class="pipe-sub">google-sheets:filterRows · URL match</div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon purple">🤖</div>
+        <div class="pipe-body">
+          <div class="pipe-name">LLM Extraction</div>
+          <div class="pipe-sub">http:MakeRequest → LLM API (OpenRouter)</div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon amber">🧹</div>
+        <div class="pipe-body">
+          <div class="pipe-name">JSON Sanitizer</div>
+          <div class="pipe-sub">util:SetVariable2 · strip markdown fences</div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon blue">{ }</div>
+        <div class="pipe-body">
+          <div class="pipe-name">JSON Parser</div>
+          <div class="pipe-sub">json:ParseJSON · typed data structure</div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon green">📊</div>
+        <div class="pipe-body">
+          <div class="pipe-name">Append to Database</div>
+          <div class="pipe-sub">google-sheets:addRow · column mapping</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ WORKFLOW LINK ══ -->
+<section id="workflow">
+  <div class="section-label">Access the Workflow</div>
+
+  <div class="workflow-card reveal">
+    <div>
+      <div class="wf-label">Make.com Blueprint</div>
+      <div class="wf-title">Import the scenario<br />into your account</div>
+      <p class="wf-desc">
+        The workflow is shared as a Make.com blueprint JSON file. Download it and import it directly into your Make.com workspace — all module configurations, filters, and mappings are preserved.
+      </p>
+
+      <div class="wf-meta">
+        <div class="wf-tag"><span>✓</span> 6 modules configured</div>
+        <div class="wf-tag"><span>✓</span> LLM prompt included</div>
+        <div class="wf-tag"><span>✓</span> EU region (eu1.make.com)</div>
+        <div class="wf-tag"><span>✓</span> Google Sheets ready</div>
+      </div>
+
+      <div class="hero-cta-row">
+        <a id="blueprintBtn" href="#" class="btn-primary">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download Blueprint (.json)
+        </a>
+        <a id="makeShareBtn" href="#" class="btn-ghost">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          Open in Make.com
+        </a>
+      </div>
+
+      <div style="margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7;max-width:640px;">
+        <span style="color:var(--teal)">Tip:</span> set the two URLs in the script at the bottom of this file (<code>BLUEPRINT_URL</code> and <code>MAKE_SHARE_URL</code>) and these buttons will work.
+      </div>
+    </div>
+
+    <div class="wf-right">
+      <div class="make-badge">⚡</div>
+      <div style="font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; letter-spacing: 0.08em; text-transform: uppercase;">Make.com<br />Blueprint</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ GETTING STARTED ══ -->
+<section id="getting-started">
+  <div class="section-label">Getting Started</div>
+  <h2>Up and running in<br /><em>six steps</em></h2>
+  <p class="section-intro">Follow these steps to adapt the pipeline to your own research project. Most customisations live in just two places: the LLM prompt and the Google Sheets column mapping.</p>
+
+  <div class="workflow-figure reveal">
+    <h3>// workflow map (6 modules)</h3>
+
+    <!-- Inline schematic (no external assets needed) -->
+    <svg viewBox="0 0 980 180" width="100%" height="auto" role="img" aria-label="Schematic of the 6-module Make.com workflow">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1">
+          <stop offset="0" stop-color="rgba(99,202,183,0.55)" />
+          <stop offset="1" stop-color="rgba(232,201,122,0.35)" />
+        </linearGradient>
+      </defs>
+
+      <rect x="0" y="0" width="980" height="180" rx="18" fill="rgba(17,24,39,0.55)" stroke="rgba(255,255,255,0.06)" />
+
+      <!-- connectors -->
+      <path d="M145 90 H245" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round" />
+      <path d="M305 90 H405" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round" />
+      <path d="M465 90 H565" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round" />
+      <path d="M625 90 H725" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round" />
+      <path d="M785 90 H885" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round" />
+
+      <!-- nodes -->
+      <g font-family="DM Mono, monospace" font-size="10" fill="rgba(221,228,239,0.92)">
+        <g>
+          <circle cx="105" cy="90" r="40" fill="rgba(251,146,60,0.14)" stroke="rgba(255,255,255,0.10)" />
+          <text x="105" y="86" text-anchor="middle" font-size="18">📡</text>
+          <text x="105" y="132" text-anchor="middle" fill="rgba(100,116,139,1)">RSS</text>
+          <text x="105" y="148" text-anchor="middle" fill="rgba(100,116,139,1)">Retrieve items</text>
+        </g>
+        <g>
+          <circle cx="285" cy="90" r="40" fill="rgba(52,211,153,0.14)" stroke="rgba(255,255,255,0.10)" />
+          <text x="285" y="86" text-anchor="middle" font-size="18">🔍</text>
+          <text x="285" y="132" text-anchor="middle" fill="rgba(100,116,139,1)">Sheets</text>
+          <text x="285" y="148" text-anchor="middle" fill="rgba(100,116,139,1)">Search rows</text>
+        </g>
+        <g>
+          <circle cx="445" cy="90" r="40" fill="rgba(96,165,250,0.14)" stroke="rgba(255,255,255,0.10)" />
+          <text x="445" y="86" text-anchor="middle" font-size="18">🌐</text>
+          <text x="445" y="132" text-anchor="middle" fill="rgba(100,116,139,1)">HTTP</text>
+          <text x="445" y="148" text-anchor="middle" fill="rgba(100,116,139,1)">LLM request</text>
+        </g>
+        <g>
+          <circle cx="605" cy="90" r="40" fill="rgba(251,191,36,0.14)" stroke="rgba(255,255,255,0.10)" />
+          <text x="605" y="86" text-anchor="middle" font-size="18">🧹</text>
+          <text x="605" y="132" text-anchor="middle" fill="rgba(100,116,139,1)">Tools</text>
+          <text x="605" y="148" text-anchor="middle" fill="rgba(100,116,139,1)">Sanitize JSON</text>
+        </g>
+        <g>
+          <circle cx="765" cy="90" r="40" fill="rgba(139,92,246,0.14)" stroke="rgba(255,255,255,0.10)" />
+          <text x="765" y="86" text-anchor="middle" font-size="18">{ }</text>
+          <text x="765" y="132" text-anchor="middle" fill="rgba(100,116,139,1)">JSON</text>
+          <text x="765" y="148" text-anchor="middle" fill="rgba(100,116,139,1)">Parse</text>
+        </g>
+        <g>
+          <circle cx="925" cy="90" r="40" fill="url(#g)" stroke="rgba(255,255,255,0.10)" />
+          <text x="925" y="86" text-anchor="middle" font-size="18">📊</text>
+          <text x="925" y="132" text-anchor="middle" fill="rgba(100,116,139,1)">Sheets</text>
+          <text x="925" y="148" text-anchor="middle" fill="rgba(100,116,139,1)">Add a row</text>
+        </g>
+      </g>
+    </svg>
+
+    <p>
+      This schematic matches the actual scenario layout. In the steps below, each card tells you exactly which module(s) to click in Make.com.
+    </p>
+    <div class="cap">Optional: replace with your own screenshot by adding an &lt;img&gt; tag here.</div>
+  </div>
+
+  <div class="steps-grid reveal">
+    <div class="step-card">
+      <span class="step-num">01</span>
+      <div class="step-title">Import the blueprint</div>
+      <p class="step-desc">In Make.com, go to <strong style="color:var(--text)">Scenarios → Create a new scenario → Import Blueprint</strong> and upload the JSON. All 6 modules appear pre-configured.</p>
+      <span class="step-badge">make.com → import</span>
+      <div class="module-pills">
+        <span class="module-pill"><b>Click:</b> Scenario menu</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <span class="step-num">02</span>
+      <div class="step-title">Connect your accounts</div>
+      <p class="step-desc">Re-authenticate your <strong style="color:var(--text)">Google Sheets</strong> connection(s) and add your <strong style="color:var(--text)">LLM API key</strong> in the HTTP request module.</p>
+      <span class="step-badge">credentials</span>
+      <div class="module-pills">
+        <span class="module-pill"><b>Click:</b> Google Sheets · Search Rows</span>
+        <span class="module-pill"><b>Click:</b> Google Sheets · Add a Row</span>
+        <span class="module-pill"><b>Click:</b> HTTP · Make a request</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <span class="step-num">03</span>
+      <div class="step-title">Swap the RSS feed URL</div>
+      <p class="step-desc">Replace the default PubMed RSS URL with your own feed (PubMed, arXiv, journal alerts, etc.). Keep the limit per run aligned with your plan + costs.</p>
+      <span class="step-badge">input stream</span>
+      <div class="module-pills">
+        <span class="module-pill"><b>Click:</b> RSS · Retrieve RSS feed items</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <span class="step-num">04</span>
+      <div class="step-title">Point to your spreadsheet</div>
+      <p class="step-desc">Select your spreadsheet + sheet name for both the duplicate check and the database append. Confirm which column stores your unique ID (URL or DOI).</p>
+      <span class="step-badge">database</span>
+      <div class="module-pills">
+        <span class="module-pill"><b>Click:</b> Google Sheets · Search Rows</span>
+        <span class="module-pill"><b>Click:</b> Google Sheets · Add a Row</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <span class="step-num">05</span>
+      <div class="step-title">Customise extraction fields</div>
+      <p class="step-desc">Edit the LLM prompt (schema + scoring) and keep “JSON only” output. If you change fields, also update the JSON parser structure and the final column mapping.</p>
+      <span class="step-badge">schema</span>
+      <div class="module-pills">
+        <span class="module-pill"><b>Click:</b> HTTP · Make a request</span>
+        <span class="module-pill"><b>Click:</b> Tools · Set variable</span>
+        <span class="module-pill"><b>Click:</b> JSON · Parse JSON</span>
+        <span class="module-pill"><b>Click:</b> Google Sheets · Add a Row</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <span class="step-num">06</span>
+      <div class="step-title">Schedule &amp; run</div>
+      <p class="step-desc">Run once manually to validate, then set a schedule (daily/weekly) via the scenario clock icon. Review the execution log to confirm it’s stable.</p>
+      <span class="step-badge">automation</span>
+      <div class="module-pills">
+        <span class="module-pill"><b>Click:</b> Scenario settings · Scheduling</span>
+        <span class="module-pill"><b>Click:</b> Run once (top bar)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Adaptation guide -->
+  <div style="margin-top: 72px;">
+    <div class="section-label">Adaptation Guide</div>
+    <div class="adapt-title">Key things to change <em style="font-family:var(--serif);font-style:italic;color:var(--gold)">for your project</em></div>
+
+    <div class="adapt-grid reveal reveal-d1">
+      <div class="adapt-card">
+        <div class="adapt-module">Module · RSS Reader</div>
+        <div class="adapt-heading">RSS source &amp; throughput</div>
+        <p class="adapt-desc">Replace the RSS URL with the feed you want to monitor. Adjust the max results per run to control workload and cost.</p>
+        <div class="adapt-code">url: <span class="hl">"https://.../rss/search/YOUR_QUERY/?limit=50"</span><br />maxResults: <span class="hl">"25"</span></div>
+      </div>
+
+      <div class="adapt-card">
+        <div class="adapt-module">Module · Duplicate Check (Sheets filter)</div>
+        <div class="adapt-heading">De-duplication key</div>
+        <p class="adapt-desc">Choose the column you want to match on (paper URL, DOI, or GUID). The default setup checks whether the RSS URL already exists in the sheet.</p>
+        <div class="adapt-code">filter column: <span class="hl">"W" → your URL/DOI column</span></div>
+      </div>
+
+      <div class="adapt-card">
+        <div class="adapt-module">Module · LLM Extraction (HTTP)</div>
+        <div class="adapt-heading">API key, model, and prompt</div>
+        <p class="adapt-desc">Swap the model, revise the schema, and keep the “JSON only” constraint for reliable parsing. Temperature 0 improves consistency.</p>
+        <div class="adapt-code">model: <span class="hl">"openai/gpt-4o-mini"</span><br />Authorization: <span class="hl">"Bearer YOUR_KEY"</span></div>
+      </div>
+
+      <div class="adapt-card">
+        <div class="adapt-module">Module · Append to Database (Sheets add row)</div>
+        <div class="adapt-heading">Column mapping</div>
+        <p class="adapt-desc">Map each extracted field into the correct column index. If you add a new column in Sheets, update the mapping object accordingly.</p>
+        <div class="adapt-code">"6": <span class="hl">{{12.YourField}}</span><br />"21": <span class="hl">{{1.url}}</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ QUESTIONS ══ -->
+<section id="questions">
+  <div class="faq-layout">
+    <div class="faq-sidebar">
+      <div class="section-label">FAQ</div>
+      <h2>Common<br /><em>questions</em></h2>
+      <p>Everything you might wonder about adapting this workflow to your own research domain.</p>
+
+      <div class="faq-contact">
+        <div class="faq-contact-label">Note</div>
+        <p>This page intentionally omits personal contact details to avoid spam. Add yours if you want it public.</p>
+      </div>
+    </div>
+
+    <div class="faq-list" id="faq">
+      <div class="faq-item open">
+        <button class="faq-q">
+          Do I need a paid Make.com account to use this?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>A free Make.com plan has limited operations per month. If you run this daily and fetch 25 items, you may hit that limit. A paid plan can be worth it if you want frequent runs at scale.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          Can I use a different LLM?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes. The LLM call is an HTTP request. If you use OpenRouter you can swap <code>model</code> freely. If you use a different provider, adjust the URL + headers + response parsing.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          What if my content isn’t on PubMed?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Any RSS/Atom feed works: arXiv, bioRxiv, journal feeds, institutional news, GitHub releases — as long as the feed contains a title + summary/description you can extract from.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          How do I add new fields (e.g., DOI, journal, publication date)?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Add the field to the LLM prompt, update the Parse JSON data structure, then map it into a new Google Sheets column. If you insert a column in the sheet, update the <code>values</code> mapping in the add-row module.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          The duplicate check isn’t working — why?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Most often it’s the matching column: ensure the filter checks the same column where you store the unique identifier (URL/DOI). Also confirm your header range includes that column.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          Can I add alerts (email/Slack) for high-relevance items?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes — just add modules after “Append to Database”, and place a filter on your score field (e.g., notify only if score ≥ 4).</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-brand">
+    <strong>Research Intelligence Pipeline</strong> · Built with Make.com
+  </div>
+  <div class="footer-note">Adapt freely · Automate kindly</div>
+</footer>
+
+<!-- ══ JS ══ -->
+<script>
+  // 1) Set your links here
+  //    - BLUEPRINT_URL: direct download link (GitHub raw URL, your site, etc.)
+  //    - MAKE_SHARE_URL: Make.com scenario share link (if you generated one)
+  const BLUEPRINT_URL = "";
+  const MAKE_SHARE_URL = "";
+
+  function wireButton(id, url, emptyMessage) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (url && url.trim()) {
+      el.href = url;
+      el.target = "_blank";
+      el.rel = "noopener";
+      return;
+    }
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert(emptyMessage);
+    });
+  }
+
+  wireButton(
+    'blueprintBtn',
+    BLUEPRINT_URL,
+    'Set BLUEPRINT_URL in the script at the bottom of this HTML to your blueprint JSON download link.'
+  );
+
+  wireButton(
+    'makeShareBtn',
+    MAKE_SHARE_URL,
+    'Set MAKE_SHARE_URL in the script at the bottom of this HTML to your Make.com scenario share link.'
+  );
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Nav active highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--teal)' : '';
+    });
+  });
+</script>
+</body>
+</html>
